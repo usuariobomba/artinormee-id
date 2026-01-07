@@ -1916,7 +1916,7 @@
                                 <div class="ladi-form-item-background"></div>
                                 <div class="ladi-form-item"><input name="phone"
                                         onkeyup="this.value=this.value.replace(/\s/,'')" minlength="5" required
-                                        class="ladi-form-control" type="tel" placeholder="Nomor telepon" value="08" />
+                                        class="ladi-form-control" type="tel" placeholder="Nomor telepon" value="+62" />
                                 </div>
                             </div>
                         </div>
@@ -3143,7 +3143,7 @@
                                 <div class="ladi-form-item-background"></div>
                                 <div class="ladi-form-item"><input name="phone"
                                         onkeyup="this.value=this.value.replace(/\s/,'')" minlength="5" required
-                                        class="ladi-form-control" type="tel" placeholder="Nomor telepon" value="08" />
+                                        class="ladi-form-control" type="tel" placeholder="Nomor telepon" value="+62" />
                                 </div>
                             </div>
                         </div>
@@ -3733,6 +3733,48 @@
             if (localStorage.getItem('promo_lead_submitted') === 'true') {
                 return;
             }
+
+            // Enforce +62 prefix on all phone inputs
+            const enforcePrefix = function () {
+                const inputs = document.querySelectorAll('input[type="tel"], input[name="phone"]');
+                inputs.forEach(input => {
+                    // Set initial value if empty or incorrect
+                    if (!input.value.startsWith('+62')) {
+                        input.value = '+62';
+                    }
+
+                    // Prevent deletion of prefix
+                    input.addEventListener('input', function (e) {
+                        if (!this.value.startsWith('+62')) {
+                            this.value = '+62' + this.value.replace(/^\+62|^62|^\+|^0|^8/, '');
+                        }
+                    });
+
+                    input.addEventListener('focus', function () {
+                        if (this.value === '') {
+                            this.value = '+62';
+                        }
+                    });
+
+                    // Ensure cursor isn't placed before prefix (simple check)
+                    input.addEventListener('click', function () {
+                        if (this.selectionStart < 3) {
+                            this.selectionStart = this.value.length;
+                        }
+                    });
+
+                    input.addEventListener('keydown', function (e) {
+                        // Prevent backspace if cursor is at position 3 or less
+                        if ((e.key === 'Backspace' || e.key === 'Delete') && this.selectionStart <= 3 && this.selectionEnd === this.selectionStart) {
+                            e.preventDefault();
+                        }
+                    });
+                });
+            };
+
+            // Run enforcement immediately and periodically (in case of dynamic loading)
+            enforcePrefix();
+            setInterval(enforcePrefix, 1000);
 
             // Close popup when clicking outside (backdrop)
             var popupOverlay = document.getElementById('promo-popup');
