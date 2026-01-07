@@ -3729,8 +3729,13 @@
         }
 
         window.addEventListener('load', function () {
-            // Check if user already submitted lead
-            if (localStorage.getItem('promo_lead_submitted') === 'true') {
+            // Check if user already submitted lead OR if URL has success status
+            const urlParams = new URLSearchParams(window.location.search);
+            if (localStorage.getItem('promo_lead_submitted') === 'true' || urlParams.get('status') === 'success') {
+                // Ensure flag is set if we are on success page (failsafe)
+                if (urlParams.get('status') === 'success') {
+                    localStorage.setItem('promo_lead_submitted', 'true');
+                }
                 return;
             }
 
