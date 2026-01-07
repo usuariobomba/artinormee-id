@@ -1916,7 +1916,7 @@
                                 <div class="ladi-form-item-background"></div>
                                 <div class="ladi-form-item"><input name="phone"
                                         onkeyup="this.value=this.value.replace(/\s/,'')" minlength="5" required
-                                        class="ladi-form-control" type="tel" placeholder="Nomor telepon" value="" />
+                                        class="ladi-form-control" type="tel" placeholder="Nomor telepon" value="08" />
                                 </div>
                             </div>
                         </div>
@@ -3143,7 +3143,7 @@
                                 <div class="ladi-form-item-background"></div>
                                 <div class="ladi-form-item"><input name="phone"
                                         onkeyup="this.value=this.value.replace(/\s/,'')" minlength="5" required
-                                        class="ladi-form-control" type="tel" placeholder="Nomor telepon" value="" />
+                                        class="ladi-form-control" type="tel" placeholder="Nomor telepon" value="08" />
                                 </div>
                             </div>
                         </div>
@@ -3193,7 +3193,7 @@
                 <div class="promo-info-label">Nama:</div>
                 <input type="text" name="name" id="promo-name" placeholder="Masukkan nama Anda" required>
                 <div class="promo-info-label">Telepon:</div>
-                <input type="tel" name="phone" id="promo-phone" placeholder="Telepon Anda" required>
+                <input type="tel" name="phone" id="promo-phone" placeholder="Telepon Anda" value="+62" required>
                 <button type="submit" class="promo-submit">Dapatkan penawaran</button>
             </form>
         </div>
@@ -3729,6 +3729,21 @@
         }
 
         window.addEventListener('load', function () {
+            // Check if user already submitted lead
+            if (localStorage.getItem('promo_lead_submitted') === 'true') {
+                return;
+            }
+
+            // Close popup when clicking outside (backdrop)
+            var popupOverlay = document.getElementById('promo-popup');
+            if (popupOverlay) {
+                popupOverlay.addEventListener('click', function (e) {
+                    if (e.target === popupOverlay) {
+                        popupOverlay.classList.remove('active');
+                    }
+                });
+            }
+
             setTimeout(function () {
                 var promo = document.getElementById('promo-popup');
                 if (promo) {
@@ -3736,6 +3751,13 @@
                     startPromoTimer(6 * 60 * 60);
                 }
             }, 1000);
+        });
+
+        // Set flag when form is submitted
+        document.addEventListener('submit', function (e) {
+            if (e.target.closest('form')) {
+                localStorage.setItem('promo_lead_submitted', 'true');
+            }
         });
     </script>
     <div id="success-modal" class="success-modal-overlay">
@@ -3792,14 +3814,19 @@
                     const digits = phone.replace(/\D/g, ''); // Keep only numbers
 
                     // Indonesian mobile numbers usually start with 8 (after prefix)
-                    // We accept: +628..., 628..., 08... or just 8...
-                    const hasCorrectStart = phone.startsWith('+628') || phone.startsWith('628') || phone.startsWith('08') || phone.startsWith('8');
+                    // We accept: +628..., +6208..., 08... or just 8...
+                    const hasCorrectStart = phone.startsWith('+628') || phone.startsWith('+6208') || phone.startsWith('628') || phone.startsWith('08') || phone.startsWith('8');
                     const hasCorrectLength = digits.length >= 9 && digits.length <= 13;
 
                     if (!hasCorrectStart || !hasCorrectLength) {
                         e.preventDefault();
-                        alert('Silakan masukkan nomor telepon yang valid (9-13 digit, misalnya: 08123456789).');
+                        alert('Silakan masukkan nomor telepon yang valid (9-13 digit, misalnya: +628123456789).');
                         return false;
+                    }
+
+                    // Optional cleanup: remove "0" right after +62 if present for normalization
+                    if (phone.startsWith('+6208')) {
+                        phoneInput.value = '+62' + phone.substring(4);
                     }
                 }
             });
