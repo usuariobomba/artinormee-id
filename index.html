@@ -3174,86 +3174,7 @@
         </div>
     </div>
 
-    <div id="promo-popup" class="promo-popup-overlay">
-        <div class="promo-popup-content">
-            <div class="promo-header">HARI INI KESEMPATAN TERAKHIR UNTUK PENAWARAN KHUSUS!</div>
-            <div class="promo-timer-container">
-                <div class="promo-timer-label">⏰ Penawaran berakhir dalam:</div>
-                <div class="promo-timer-display" id="promo-timer">
-                    <span class="time-box" id="hours">06</span> :
-                    <span class="time-box" id="minutes">00</span> :
-                    <span class="time-box" id="seconds">00</span>
-                </div>
-            </div>
-            <img src="assets/s700x700/5da6cb07a973800e7e31908d/rbg/tensimin_image-20220518064324.png"
-                class="promo-product-img" alt="Product">
-            <div class="promo-price">Preço: 390000 IDR</div>
-            <form action="/api/order" method="post" class="promo-form">
-                <input type="hidden" name="subacc" class="subacc_input">
-                <div class="promo-info-label">Nama:</div>
-                <input type="text" name="name" id="promo-name" placeholder="Masukkan nama Anda" required>
-                <div class="promo-info-label">Telepon:</div>
-                <input type="tel" name="phone" id="promo-phone" placeholder="Telepon Anda" value="+62" required>
-                <button type="submit" class="promo-submit">Dapatkan penawaran</button>
-            </form>
-        </div>
-    </div>
 
-    <script>
-        function startPromoTimer(duration) {
-            var timer = duration, hours, minutes, seconds;
-            var displayHours = document.getElementById('hours');
-            var displayMinutes = document.getElementById('minutes');
-            var displaySeconds = document.getElementById('seconds');
-
-            var interval = setInterval(function () {
-                hours = parseInt(timer / 3600, 10);
-                minutes = parseInt((timer % 3600) / 60, 10);
-                seconds = parseInt(timer % 60, 10);
-
-                displayHours.textContent = hours < 10 ? "0" + hours : hours;
-                displayMinutes.textContent = minutes < 10 ? "0" + minutes : minutes;
-                displaySeconds.textContent = seconds < 10 ? "0" + seconds : seconds;
-
-                if (--timer < 0) {
-                    clearInterval(interval);
-                }
-            }, 1000);
-        }
-
-        function closePromo() {
-            document.getElementById('promo-popup').classList.remove('active');
-        }
-
-        function submitPromo(e) {
-            e.preventDefault();
-            var name = document.getElementById('promo-name').value;
-            var phone = document.getElementById('promo-phone').value;
-
-            // Sync with main form
-            var mainForms = document.querySelectorAll('.orderForm');
-            if (mainForms.length > 0) {
-                var mainName = mainForms[0].querySelector('input[name="name"]');
-                var mainPhone = mainForms[0].querySelector('input[name="phone"]');
-
-                if (mainName) mainName.value = name;
-                if (mainPhone) mainPhone.value = phone;
-
-                mainForms[0].submit();
-            } else {
-                alert('Order submitted successfully!');
-                closePromo();
-            }
-        }
-
-        window.addEventListener('load', function () {
-            setTimeout(function () {
-                document.getElementById('promo-popup').classList.add('active');
-                startPromoTimer(6 * 60 * 60);
-            }, 1000);
-        });
-    </script>
-    <div id="backdrop-popup" class="backdrop-popup"></div>
     <div id="backdrop-dropbox" class="backdrop-dropbox"></div>
     <div id="lightbox-screen" class="lightbox-screen"></div>
     <script id="script_lazyload" type="text/javascript">
@@ -3682,131 +3603,6 @@
         });
     </script>
 
-    <script src="https://static.introphin.com/dist/api/lead-1.1.0.min.js"></script>
-    <script>
-        drlead.init({
-            params: {
-                token: "YTFKNZQZMZETNMIXZS00ZGM4LWI5NTCTYWYWZDI5ZJAYMMNJ", // required
-                stream_code: "irul3", // required
-                thanks_page: "./thanks"
-            },
-            subs: {
-                sub1: drlead.formInputGet("sub1") || drlead.queryGet("sub1"),
-                sub2: drlead.formInputGet("sub2") || drlead.queryGet("sub2"),
-                sub3: drlead.formInputGet("sub3") || drlead.queryGet("sub3"),
-                sub4: drlead.formInputGet("sub4") || drlead.queryGet("sub4"),
-                sub5: drlead.formInputGet("sub5") || drlead.queryGet("sub5"),
-            },
-            callback: function (error, response) {
-                // On request done
-            },
-            before: function () {
-                // before request done
-            }
-        });
-    </script>
-
-    <script>
-        function startPromoTimer(duration) {
-            var timer = duration, hours, minutes, seconds;
-            var displayHours = document.getElementById('hours');
-            var displayMinutes = document.getElementById('minutes');
-            var displaySeconds = document.getElementById('seconds');
-
-            var interval = setInterval(function () {
-                hours = parseInt(timer / 3600, 10);
-                minutes = parseInt((timer % 3600) / 60, 10);
-                seconds = parseInt(timer % 60, 10);
-
-                displayHours.textContent = hours < 10 ? "0" + hours : hours;
-                displayMinutes.textContent = minutes < 10 ? "0" + minutes : minutes;
-                displaySeconds.textContent = seconds < 10 ? "0" + seconds : seconds;
-
-                if (--timer < 0) {
-                    clearInterval(interval);
-                }
-            }, 1000);
-        }
-
-        window.addEventListener('load', function () {
-            // Check if user already submitted lead OR if URL has success status
-            const urlParams = new URLSearchParams(window.location.search);
-            if (localStorage.getItem('promo_lead_submitted') === 'true' || urlParams.get('status') === 'success') {
-                // Ensure flag is set if we are on success page (failsafe)
-                if (urlParams.get('status') === 'success') {
-                    localStorage.setItem('promo_lead_submitted', 'true');
-                }
-                return;
-            }
-
-            // Enforce +62 prefix on all phone inputs
-            const enforcePrefix = function () {
-                const inputs = document.querySelectorAll('input[type="tel"], input[name="phone"]');
-                inputs.forEach(input => {
-                    // Set initial value if empty or incorrect
-                    if (!input.value.startsWith('+62')) {
-                        input.value = '+62';
-                    }
-
-                    // Prevent deletion of prefix
-                    input.addEventListener('input', function (e) {
-                        if (!this.value.startsWith('+62')) {
-                            this.value = '+62' + this.value.replace(/^\+62|^62|^\+|^0|^8/, '');
-                        }
-                    });
-
-                    input.addEventListener('focus', function () {
-                        if (this.value === '') {
-                            this.value = '+62';
-                        }
-                    });
-
-                    // Ensure cursor isn't placed before prefix (simple check)
-                    input.addEventListener('click', function () {
-                        if (this.selectionStart < 3) {
-                            this.selectionStart = this.value.length;
-                        }
-                    });
-
-                    input.addEventListener('keydown', function (e) {
-                        // Prevent backspace if cursor is at position 3 or less
-                        if ((e.key === 'Backspace' || e.key === 'Delete') && this.selectionStart <= 3 && this.selectionEnd === this.selectionStart) {
-                            e.preventDefault();
-                        }
-                    });
-                });
-            };
-
-            // Run enforcement immediately and periodically (in case of dynamic loading)
-            enforcePrefix();
-            setInterval(enforcePrefix, 1000);
-
-            // Close popup when clicking outside (backdrop)
-            var popupOverlay = document.getElementById('promo-popup');
-            if (popupOverlay) {
-                popupOverlay.addEventListener('click', function (e) {
-                    if (e.target === popupOverlay) {
-                        popupOverlay.classList.remove('active');
-                    }
-                });
-            }
-
-            setTimeout(function () {
-                var promo = document.getElementById('promo-popup');
-                if (promo) {
-                    promo.classList.add('active');
-                    startPromoTimer(6 * 60 * 60);
-                }
-            }, 1000);
-        });
-
-        // Set flag when form is submitted
-        document.addEventListener('submit', function (e) {
-            if (e.target.closest('form')) {
-                localStorage.setItem('promo_lead_submitted', 'true');
-            }
-        });
-    </script>
     <div id="success-modal" class="success-modal-overlay">
         <div class="success-modal-content">
             <h2>Pesanan Terkonfirmasi!</h2>
@@ -3839,8 +3635,8 @@
                 if (typeof gtag === 'function') {
                     gtag('event', 'conversion', {
                         'send_to': 'AW-852350021/s5LKCOXZ8tkbEMWot5YD',
-                        'value': 30,
-                        'currency': 'USD',
+                        'value': 390000,
+                        'currency': 'IDR',
                         'transaction_id': Date.now()
                     });
                 }
@@ -3851,34 +3647,9 @@
                     window.history.replaceState({}, document.title, newUrl);
                 }
             }
-
-            // 3. Phone Validation Rule
-            document.addEventListener('submit', function (e) {
-                const form = e.target;
-                const phoneInput = form.querySelector('input[name="phone"]');
-                if (phoneInput) {
-                    const phone = phoneInput.value.trim();
-                    const digits = phone.replace(/\D/g, ''); // Keep only numbers
-
-                    // Indonesian mobile numbers usually start with 8 (after prefix)
-                    // We accept: +628..., +6208..., 08... or just 8...
-                    const hasCorrectStart = phone.startsWith('+628') || phone.startsWith('+6208') || phone.startsWith('628') || phone.startsWith('08') || phone.startsWith('8');
-                    const hasCorrectLength = digits.length >= 9 && digits.length <= 13;
-
-                    if (!hasCorrectStart || !hasCorrectLength) {
-                        e.preventDefault();
-                        alert('Silakan masukkan nomor telepon yang valid (9-13 digit, misalnya: +628123456789).');
-                        return false;
-                    }
-
-                    // Optional cleanup: remove "0" right after +62 if present for normalization
-                    if (phone.startsWith('+6208')) {
-                        phoneInput.value = '+62' + phone.substring(4);
-                    }
-                }
-            });
         })();
     </script>
+    <script src="js/simple-submit.js"></script>
 </body>
 
 </html>
