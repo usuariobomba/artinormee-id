@@ -1,43 +1,79 @@
 export default async function handler(req, res) {
-  const data = req.method === 'POST' ? req.body : req.query;
-
-  // --- CONFIGURAÇÃO ---
-  const token = 'YTFKNZQZMZETNMIXZS00ZGM4LWI5NTCTYWYWZDI5ZJAYMMNJ';
-  const streamCode = 'irul3';
-  // --------------------
-
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method Not Allowed' });
+    return;
+  }
+  // ===== CONFIGURAÇÕES - Traffic Light =====
+  const API_KEY = 'skuVwANNCTIUTecoOWbUh6Ck1bSUAgJEnNb3Wvxb6';
+  const OFFER_ID = '12541';
+  const STREAM_ID = 'ddpUa7o3';
+  const COUNTRY_CODE = 'ID';
+  // ==========================================
+  const API_URL = 'http://api.cpa.tl/api/lead/send';
   try {
-    // Mapeamento para API Dr.Cash (JSON)
-    const payload = {
-      stream_code: streamCode,
-      client: {
-        name: data.name,
-        phone: data.phone,
-        ip: req.headers['x-forwarded-for'] || '127.0.0.1'
-      },
-      sub1: data.subacc || '' // ClickID do Google
-    };
-
-    console.log("Enviando...", payload);
-
-    const response = await fetch('https://order.drcash.sh/v1/order', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
+    const body = req.body;
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    const apiData = new URLSearchParams();
+    apiData.append('key', API_KEY);
+    apiData.append('id', Date.now().toString());
+    apiData.append('offer_id', OFFER_ID);
+    apiData.append('stream_hid', STREAM_ID);
+    apiData.append('name', body.name || '');
+    apiData.append('phone', body.phone || '');
+    apiData.append('comments', body.comments || '');
+    apiData.append('country', COUNTRY_CODE);
+    apiData.append('address', body.address || '');
+    apiData.append('tz', body.timezone_int || '7');
+    apiData.append('web_id', body.web_id || '');
+    apiData.append('ip_address', ip);
+    apiData.append('user_agent', userAgent);
+    const optionalFields = [
+      'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+      'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub1024'
+    ];
+    optionalFields.forEach(field => {
+      if (body[field]) apiData.append(field, body[field]);
     });
-
-    if (response.ok) {
-      // SUCESSO: Redireciona para a Home com flag de sucesso para abrir o popup
-      return res.redirect(302, '/?status=success');
+    // Map subacc to sub1 for backward compatibility
+    if (body.subacc && !body.sub1) {
+      apiData.append('sub1', body.subacc);
+    }
+    console.log('Sending to Traffic Light:', Object.fromEntries(apiData));
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      body: apiData,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+    const responseText = await response.text();
+    console.log('Traffic Light Response:', responseText);
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Failed to parse response', e);
+      res.status(500).json({ error: 'Invalid response from affiliate network', raw: responseText });
+      return;
+    }
+    if (response.ok && !result.error && !result.errmsg) {
+      res.status(200).json({ success: true, data: result });
     } else {
-      // ERRO: Mostra na tela para debug
-      const errorText = await response.text();
-      return res.status(400).json({ erro: "Dr.Cash Recusou", detalhe: errorText, payload });
+      res.status(400).json({
+        error: result.error || result.errmsg || 'Unknown error',
+        details: result
+      });
     }
   } catch (error) {
-    return res.status(500).json({ erro_interno: error.message });
+    console.error('Server error:', error);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 }
